@@ -1,0 +1,82 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+#Standardizasyon Islemleri
+
+
+```{r}
+install.packages("clusterSim")
+library(clusterSim)
+
+a <- 1:100
+
+#0 ile 1 arasi
+
+st_sifir_bir <- function(x) {
+  
+  (x-min(x))/(max(x)-min(x))
+  
+}
+
+
+st_sifir_bir(a)
+
+
+#z donusumu
+
+st_z <- function(x) {
+  
+  (x - mean(x)) / sd(x)
+
+}
+
+
+st_z(a)
+
+
+#-1 +1
+
+bb <- function(x) {
+  
+  ((x-mean(x)) / max(abs(x-mean(x))))
+
+}
+
+
+bb(a)
+
+
+## cok degiskenli veri setine uygulama
+
+df <- data.frame(
+  
+  x = rnorm(50, 40, 10),
+  y = rnorm(50, 30, 8),
+  z = rnorm(50, 25, 5)
+  
+)
+
+
+summary(df)
+
+#sifir bir donusumunu uygulamak istedigimizi dusunelim
+library(tidyverse)
+
+#ne yapacagiz? her bir degiskene tek tek donusum uygulayip tekrar df icine mi atayacagiz? 
+#tabi ki hayir hem dplyr biliyoruz hem de apply biliyoruz
+
+#apply ile
+apply(df, 2, st_sifir_bir)
+
+#dplyr ile
+df %>% mutate_all(st_sifir_bir)
+
+
+
+
+
+```
+`

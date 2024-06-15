@@ -1,0 +1,288 @@
+---
+title: "R Notebook"
+output: html_notebook
+editor_options: 
+  chunk_output_type: inline
+---
+# Aykiri Gozlem Analizi
+
+# Box-Plot ile Aykiri Gozlemlerin Yakalanmasi
+## Aykiri Gozlem Indekslerinin Bulunmasi
+## Iki Degiskende Kesisen Aykiri Gozlemler
+## Iki Degiskendeki Tum Aykiri Gozlemler
+
+m <- rnorm(100)
+head(m, 20)
+st <- boxplot.stats(m)
+ 
+st  
+
+#The outliers are defined in an out property of the st object. We'll find the indexes of those elements.
+
+st$out
+
+out_index <- which(m %in% st$out)
+ 
+m[out_index]
+out_index
+
+#Finally, we'll plot m vector and highlight the outliers.
+plot(m, type = "l", col = "blue")
+points(x = out_index, y = m[out_index], pch = 19, col = "red")
+
+
+
+```{r}
+set.seed(54)
+veri <- rnorm(100)
+summary(veri)
+veri <- c(veri, c(4,5,6))
+boxplot(veri)
+boxplot.stats(veri)$out
+summary(veri)
+
+which(veri %in% boxplot.stats(veri)$out)
+
+
+
+
+set.seed(54)
+x <- rnorm(100)
+x <- c(x, c(4,5,6))
+summary(x)
+
+set.seed(455)
+y <- rnorm(100)
+y  <- c(y, c(4,5,6))
+
+df <- data.frame(x, y)
+
+
+a <- which(df$x %in% boxplot.stats(df$x)$out)
+b <- which(df$y %in% boxplot.stats(df$y)$out)
+
+```
+
+
+
+# Aykiri Gozlem Problemini Cozmek
+
+## Silmek
+```{r}
+set.seed(54)
+x <- rnorm(100)
+x <- c(x, c(4,5,6))
+
+set.seed(455)
+y <- rnorm(100)
+y  <- c(y, c(4,5,6))
+
+df <- data.frame(x, y)
+
+
+ortak_tum <- union(a,b)
+
+summary(df[-ortak_tum,])
+
+```
+
+## Aykiri Gozlemlerin Ortalama ile Doldurulmasi
+```{r}
+set.seed(54)
+x <- rnorm(100)
+x <- c(x, c(4,5,6))
+
+set.seed(455)
+y <- rnorm(100)
+y  <- c(y, c(4,5,6))
+
+df <- data.frame(x, y)
+
+a <- which(df$x %in% boxplot.stats(df$x)$out)
+b <- which(df$y %in% boxplot.stats(df$y)$out)
+
+df[a, ]$x
+
+df[a, ]$x <- mean(df$x)
+summary(df$x)
+
+
+
+```
+
+
+
+## Aykiri Gozlemlerin Baskilanmasi
+```{r}
+set.seed(54)
+x <- rnorm(100)
+x <- c(x, c(4,5,6))
+
+set.seed(455)
+y <- rnorm(100)
+y  <- c(y, c(4,5,6))
+
+df <- data.frame(x, y)
+
+a <- which(df$x %in% boxplot.stats(df$x)$out)
+b <- which(df$y %in% boxplot.stats(df$y)$out)
+
+df[a, ]$x <- fivenum(df$x)[4]
+
+```
+
+
+
+## Aykiri Gozlemlerin Tahminle Doldurulmasi
+```{r}
+set.seed(54)
+x <- rnorm(100)
+x <- c(x, c(4,5,6))
+
+set.seed(455)
+y <- rnorm(100)
+y  <- c(y, c(4,5,6))
+
+df <- data.frame(x, y)
+
+a <- which(df$x %in% boxplot.stats(df$x)$out)
+b <- which(df$y %in% boxplot.stats(df$y)$out)
+
+ortak_tum <- union(a,b)
+
+df[ortak_tum,]
+df[a, ]$x <- NA
+df[b, ]$y <- NA
+summary(df)
+
+df_all <- data.frame(df, rnorm(103), rnorm(103),rnorm(103))
+install.packages("missForest")
+library(missForest)
+rf_data <- missForest(df_all)
+rf<- rf_data$ximp
+summary(rf)
+
+```
+
+
+
+
+# Cok Degiskenli Aykiri Gozlem Incelemesi
+
+# Local Outlier Factor 
+
+## Aykiri Gozlem Skorlarinin Hesaplanmasi
+
+```{r}
+install.packages("DMwR")
+library(DMwR2)
+iris
+str(iris)
+summary(iris)
+
+df <- iris[ ,1:4]
+
+aykiri_skor <- lofactor(df, k = 5)
+
+plot(density(aykiri_skor))
+
+```
+
+## Aykiri Gozlem Indekslerine Erismek
+
+```{r}
+
+order(aykiri_skor, decreasing = T)[1:5]
+
+```
+
+## Aykiri Gozlem Degerlerine Erismek
+
+```{r}
+
+aykirilar <- order(aykiri_skor, decreasing = T)[1:5]
+print(df[aykirilar,])
+
+
+```
+
+
+
+
+# Cok Degiskenli Veri Icerisinde Aykirilari Gorsellestirilmesi
+
+```{r}
+df <- iris[ ,1:4]
+n <- nrow(df)
+etiketler <- 1:n
+
+aykirilar <- order(aykiri_skor, decreasing = T)[1:5]
+
+etiketler[-aykirilar] <- "." 
+
+biplot(prcomp(df), cex = 1, xlabs = etiketler)
+
+
+```
+
+
+
+
+# Kumeleme Yontemi Ile Aykiri Gozlem Analizi
+## Aykiri Gozlemlere Erismek
+
+```{r}
+df <- iris[,1:4]
+
+k_ort <- kmeans(df, centers = 3)
+plot(df, col = k_ort$cluster)
+
+k_ort$centers
+k_ort$cluster
+
+merkez_df <- k_ort$centers[k_ort$cluster,]
+uzakliklar <- sqrt(rowSums(df, merkez_df)^2)
+
+aykirilar <- order(uzakliklar, decreasing = T)[1:10]
+print(df[aykirilar,])
+
+```
+
+
+Kaynaklar: 
+
+Applied Predictive Modeling
+Max Kuhn, Kjell Johnson
+
+R for Data Science 
+Hadley Wickham
+
+Statistical Learning 
+Trevor Hastie, Robert Tibshirani, Jerome Friedman
+
+Yapay Ogrenme
+Ethem Alpaydin
+
+Data Mining Applications with R
+Yanchang Zhao, Yonghua Cen
+
+Sheldon Ross
+Introductory Statistics
+
+Sheldon Ross
+A First Course in Probability
+
+Machine Learning - Coursera
+Andrew Ng
+
+R Programming for Data Science
+Roger D. Peng
+
+Kavram Ve Algoritmalariyla Temel Veri Madenciligi
+Gokhan Silahtaroglu
+
+Data Veri Madenciligi - Veri Analizi
+Haldun Akpinar
+
+Cok Degiskenli Istatistiksel Yontemler
+Reha ALPAR
