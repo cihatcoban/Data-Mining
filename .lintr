@@ -1,0 +1,7 @@
+linters: linters_with_defaults(
+    line_length_linter(120L),
+    object_name_linter(styles = "snake_case"),
+    object_usage_linter = NULL,
+    T_and_F_symbol_linter()
+  )
+encoding: "UTF-8"

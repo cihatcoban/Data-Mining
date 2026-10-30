@@ -1,0 +1,43 @@
+---
+title: "05 - Carseats Veri Seti Üzerinde Naive Bayes Sınıflandırma"
+author: "Cihat Çoban"
+output:
+  html_document:
+    toc: true
+    theme: flatly
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+for (f in list.files("../R", pattern = "\\.R$", full.names = TRUE)) source(f)
+```
+
+## 1. Veri Hazırlama ve Eğitim/Test Bölünmesi
+
+```{r prepare-data}
+data("Carseats", package = "ISLR", envir = environment())
+df_carseats <- binarize_carseats_sales(Carseats, threshold = 8.0)
+splits <- split_carseats_data(df_carseats, target_col = "Sales", train_ratio = 0.8, seed = 123L)
+```
+
+## 2. Naive Bayes Model Eğitimi ve Performans Metrikleri
+
+```{r train-evaluate}
+nb_fit <- train_carseats_naive_bayes(splits$train, splits$test, target_col = "Sales")
+eval_res <- evaluate_binary_classifier(
+  actual = nb_fit$actual,
+  pred_class = nb_fit$pred_class,
+  pred_prob = nb_fit$pred_prob[, "High"],
+  positive_class = "High"
+)
+
+eval_res$confusion_table
+eval_res$metrics
+```
+
+## 3. Confusion Matrix Isı Haritası ve ROC Eğrisi
+
+```{r plots, fig.width=6.5, fig.height=5}
+plot_confusion_matrix_heatmap(eval_res$confusion_table)
+plot_roc_curve(eval_res$roc_curve)
+```

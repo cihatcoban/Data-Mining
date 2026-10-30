@@ -1,0 +1,30 @@
+# R Session & Workspace Artifacts
+.Rhistory
+.RData
+.Ruserdata
+.Rproj.user/
+*.Rproj
+
+# Package Build & Check Artifacts
+*.tar.gz
+*.Rcheck/
+packrat/
+renv/library/
+
+# Knitted & Generated Outputs
+notebooks/*.html
+notebooks/*.nb.html
+notebooks/*_files/
+notebooks/*_cache/
+outputs/plots/*.png
+outputs/tables/*.csv
+
+# Local Datasets & Secrets
+*veriler.csv
+data/raw/*.csv
+.env
+.DS_Store
+Thumbs.db
+
+.venv/
+outputs/

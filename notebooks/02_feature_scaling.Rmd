@@ -1,0 +1,44 @@
+---
+title: "02 - Değişken Ölçeklendirme ve Normalizasyon Yöntemleri"
+author: "Cihat Çoban"
+output:
+  html_document:
+    toc: true
+    theme: flatly
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+for (f in list.files("../R", pattern = "\\.R$", full.names = TRUE)) source(f)
+```
+
+## 1. Tek Değişkenli Ölçeklendirme Dönüşümleri
+
+`R/scaling.R` modülündeki fonksiyonlar sıfır varyans ve `NA` kontrolü içerir:
+
+* `scale_min_max()`: `[0, 1]` aralığına doğrusal dönüşüm
+* `scale_z_score()`: Ortalaması `0`, standart sapması `1` olan Z-skoru dönüşümü
+* `scale_mean_norm()`: `[-1, +1]` aralığına ortalama normalizasyonu
+
+```{r univariate-scaling}
+a <- 1:100
+summary(scale_min_max(a))
+summary(scale_z_score(a))
+summary(scale_mean_norm(a))
+```
+
+## 2. Çok Değişkenli Veri Çerçevesi Ölçeklendirme
+
+Eski `dplyr::mutate_all()` yerine modern `scale_dataframe()` fonksiyonu kullanılır:
+
+```{r dataframe-scaling}
+set.seed(42)
+df <- data.frame(
+  x = rnorm(50, mean = 40, sd = 10),
+  y = rnorm(50, mean = 30, sd = 8),
+  z = rnorm(50, mean = 25, sd = 5)
+)
+
+df_minmax <- scale_dataframe(df, method = "min_max")
+summary(df_minmax)
+```

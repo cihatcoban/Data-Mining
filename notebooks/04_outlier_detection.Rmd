@@ -1,0 +1,44 @@
+---
+title: "04 - Tek ve Çok Değişkenli Aykırı Gözlem (Outlier) Analizi"
+author: "Cihat Çoban"
+output:
+  html_document:
+    toc: true
+    theme: flatly
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+for (f in list.files("../R", pattern = "\\.R$", full.names = TRUE)) source(f)
+```
+
+## 1. Boxplot IQR ile Aykırı Gözlem Tespiti ve Baskılama (Winsorization)
+
+```{r iqr-outliers}
+set.seed(54)
+x <- c(rnorm(100), 4, 5, 6)
+
+iqr_res <- detect_iqr_outliers(x)
+iqr_res$indices
+iqr_res$values
+
+x_capped <- cap_iqr_outliers(x, method = "hinge")
+summary(x_capped)
+```
+
+## 2. Local Outlier Factor (LOF) ile Çok Değişkenli Aykırı Gözlem Analizi
+
+```{r lof-analysis}
+iris_num <- iris[, 1:4]
+lof_res <- detect_lof_outliers(iris_num, k = 5L, top_n = 5L)
+lof_res$top_outliers
+```
+
+## 3. K-Means Öklid Uzaklığı ile Aykırı Gözlem Tespiti (Düzeltilmiş Formül)
+
+Eski `aykiri_gozlem.Rmd` içindeki `sqrt(rowSums(df, merkez_df)^2)` hatası düzeltilerek gerçek Öklid uzaklığı kullanılmıştır:
+
+```{r kmeans-outliers}
+km_res <- detect_kmeans_outliers(iris_num, centers = 3L, top_n = 10L, seed = 42L)
+km_res$top_outliers
+```

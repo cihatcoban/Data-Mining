@@ -1,0 +1,61 @@
+---
+title: "01 - R Temel Veri Manipülasyonu ve Şarap Kalitesi Analizi"
+author: "Cihat Çoban"
+output:
+  html_document:
+    toc: true
+    theme: flatly
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+for (f in list.files("../R", pattern = "\\.R$", full.names = TRUE)) source(f)
+```
+
+## 1. Veri Setinin Okunması ve Hazırlanması
+
+Eski `NEW_R_temel_komutlar.r` betiğindeki `plyr::revalue` kaynaklı seviye ezme hatası giderilerek, hem sıralı kalite düzeyleri (`Kalite3 < ... < Kalite9`) hem de ikili kalite gruplaması (`Kalite1`, `Kalite2`) `prepare_wine_dataset()` fonksiyonu ile güvenli biçimde oluşturulur.
+
+```{r load-data}
+wine_url <- "https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-white.csv"
+sarap_raw <- read.csv(url(wine_url), header = TRUE, sep = ";")
+sarap <- prepare_wine_dataset(sarap_raw)
+
+dim(sarap)
+table(sarap$quality_ordered)
+table(sarap$quality_binary)
+```
+
+## 2. Filtreleme, Sıralama ve Özet İstatistikler
+
+```{r filter-and-sort}
+ yogun_saraplar <- subset(sarap, density > 0.995 & density < 1.0)
+ nrow(yogun_saraplar)
+
+ sirali_ornek <- sarap[1:10, c("citric.acid", "residual.sugar", "chlorides")]
+ sirali_ornek[order(sirali_ornek$residual.sugar, sirali_ornek$citric.acid), ]
+
+ round(summary(sarap$fixed.acidity), 2)
+```
+
+## 3. Temel Görselleştirmeler
+
+```{r plots, fig.width=7, fig.height=4.5}
+boxplot(
+  citric.acid ~ quality_ordered,
+  data = sarap,
+  xlab = "Şarap Kalitesi (Sıralı)",
+  ylab = "Sitrik Asit",
+  main = "Şarap Kalitesi ve Sitrik Asit Dağılımı",
+  col = "#93C5FD"
+)
+
+hist(
+  sarap$sulphates,
+  col = "#3B82F6",
+  border = "white",
+  main = "Şaraptaki Sülfat Oranı Histogramı",
+  xlab = "Sülfat Oranı",
+  ylab = "Frekans"
+)
+```
